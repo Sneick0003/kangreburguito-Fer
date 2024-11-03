@@ -1,1 +1,43 @@
-<h1>Holiwis soy el dashboard</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Empresarial</title>
+    <link rel="stylesheet" href="/css/home.css">
+</head>
+<body>
+    <%- include('../partials/sidebar') %>
+    <main class="main-content">
+        <div id="home-page">
+            <header class="header">
+                <h2>Panel de Control</h2>
+                <button id="refresh-btn">Actualizar Datos</button>
+            </header>
+            <div class="card-container">
+                <div class="card">
+                    <h3>Ventas Totales</h3>
+                    <p id="total-sales">$<%= totalVentas %></p>
+                </div>
+                <div class="card">
+                    <h3>Nuevos Clientes</h3>
+                    <p id="new-customers"><%= nuevosClientes %></p>
+                </div>
+                <div class="card">
+                    <h3>Productos en Stock</h3>
+                    <p id="stock-count"><%= totalStock %></p>
+                </div>
+                <div class="card">
+                    <h3>Pedidos Pendientes</h3>
+                    <p id="pending-orders"><%= pedidosPendientes %></p>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+        <!-- Otros elementos de la página -->
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

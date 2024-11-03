@@ -36,9 +36,14 @@ app.use(session({
 }));
 
 // Rutas públicas
+// app.js
 app.use('/', require('./routes/index.Routes')); // Ruta para la vista principal
 app.use('/login', require('./routes/login.Routes')); // Ruta para la vista de login
 app.use('/dashboard', require('./routes/home.Routes')); // Ruta para la vista de home
+app.use('/dashboard/ventas', require('./routes/venta.Routes')); // Ruta para la vista de ventas
+app.use('/dashboard/inventario', require('./routes/inventario.Routes')); // Ruta para la vista de inventario
+app.use('/dashboard/clientes', require('./routes/inventario.Routes'));
+app.use('/dashboard/categorias', require('./routes/categoria.Routes'));
 
 // // Manejo de errores 404
 // app.use((req, res) => {
