@@ -1,1 +1,205 @@
-<h1>inventario holiwis</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario de Productos</title>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body>
+  <%- include('../partials/sidebar') %>
+  <div class="container mt-4">
+    <h1 class="mb-4">Inventario de Productos</h1>
+    <button id="toggleFormBtn" class="btn btn-primary mb-4">Agregar Producto</button>
+
+    <!-- Formulario para agregar producto -->
+    <div id="addProductForm" style="display: none;">
+      <h2>Agregar Producto</h2>
+      <form id="newProductForm" action="/dashboard/inventario/add" method="POST">
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Nombre</label>
+          <input type="text" class="form-control" id="nombre" name="nombre" required>
+        </div>
+        <div class="mb-3">
+          <label for="descripcion" class="form-label">Descripción</label>
+          <textarea class="form-control" id="descripcion" name="descripcion" required></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="precio" class="form-label">Precio</label>
+          <input type="number" class="form-control" id="precio" name="precio" step="0.01" required>
+        </div>
+        <div class="mb-3">
+          <label for="cantidad_en_almacen" class="form-label">Cantidad en Almacén</label>
+          <input type="number" class="form-control" id="cantidad_en_almacen" name="cantidad_en_almacen" required>
+        </div>
+        <button type="submit" class="btn btn-success">Agregar Producto</button>
+      </form>
+    </div>
+
+    <!-- Tabla de productos -->
+    <table id="productosTable" class="display table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Precio</th>
+          <th>Cantidad en Almacén</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% productos.forEach(producto => { %>
+          <tr>
+            <td><%= producto.id %></td>
+            <td><%= producto.nombre %></td>
+            <td><%= producto.descripcion %></td>
+            <td><%= producto.precio.toFixed(2) %></td>
+            <td><%= producto.cantidad_en_almacen %></td>
+            <td>
+              <button type="button" class="btn btn-warning btn-sm editBtn">Editar</button>
+              <button type="button" class="btn btn-danger btn-sm delete-button" data-id="<%= producto.id %>">Eliminar</button>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal para editar producto -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editModalLabel">Editar Producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editProductForm" method="POST">
+            <input type="hidden" id="editProductId" name="id">
+            <div class="mb-3">
+              <label for="editNombre" class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="editNombre" name="nombre" required>
+            </div>
+            <div class="mb-3">
+              <label for="editDescripcion" class="form-label">Descripción</label>
+              <textarea class="form-control" id="editDescripcion" name="descripcion" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="editPrecio" class="form-label">Precio</label>
+              <input type="number" class="form-control" id="editPrecio" name="precio" step="0.01" required>
+            </div>
+            <div class="mb-3">
+              <label for="editCantidad" class="form-label">Cantidad en Almacén</label>
+              <input type="number" class="form-control" id="editCantidad" name="cantidad_en_almacen" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    $(document).ready(function() {
+      // Initialize DataTables
+      $('#productosTable').DataTable();
+  
+      // Handle delete product
+      $('.delete-button').on('click', function(e) {
+        e.preventDefault();
+        const productId = $(this).data('id');
+        Swal.fire({
+          title: '¿Estás seguro?',
+          text: "No podrás revertir esto.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Sí, eliminarlo'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            $.ajax({
+              url: '/dashboard/inventario/eliminar/' + productId,
+              method: 'DELETE',
+              success: function(response) {
+                Swal.fire(
+                  'Eliminado!',
+                  'El producto ha sido eliminado.',
+                  'success'
+                ).then(() => {
+                  location.reload();
+                });
+              },
+              error: function(err) {
+                Swal.fire(
+                  'Error!',
+                  'No se pudo eliminar el producto.',
+                  'error'
+                );
+              }
+            });
+          }
+        });
+      });
+  
+      // Mostrar modal de edición y cargar datos
+      $('.editBtn').on('click', function() {
+        const row = $(this).closest('tr');
+        const productId = row.find('td').eq(0).text();
+        const nombre = row.find('td').eq(1).text();
+        const descripcion = row.find('td').eq(2).text();
+        const precio = row.find('td').eq(3).text();
+        const cantidad = row.find('td').eq(4).text();
+  
+        // Llenar el modal con los datos del producto
+        $('#editProductId').val(productId);
+        $('#editNombre').val(nombre);
+        $('#editDescripcion').val(descripcion);
+        $('#editPrecio').val(precio);
+        $('#editCantidad').val(cantidad);
+  
+        // Mostrar el modal
+        $('#editModal').modal('show');
+      });
+  
+      // Manejar el envío del formulario de edición
+      $('#editProductForm').on('submit', function(e) {
+        e.preventDefault();
+        const formData = $(this).serialize();
+        const productId = $('#editProductId').val();
+  
+        $.ajax({
+          url: '/dashboard/inventario/editar/' + productId,
+          method: 'POST',
+          data: formData,
+          success: function(response) {
+            Swal.fire(
+              'Actualizado!',
+              'El producto ha sido actualizado correctamente.',
+              'success'
+            ).then(() => {
+              // Redirige al dashboard después de la edición exitosa
+              window.location.href = '/dashboard/inventario';
+            });
+          },
+          error: function(err) {
+            Swal.fire(
+              'Error!',
+              'No se pudo actualizar el producto.',
+              'error'
+            );
+          }
+        });
+      });
+    });
+  </script>
+  
+</body>
+</html>

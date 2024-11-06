@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const loginController = require('../controllers/login.Controller');
+const assignRole = require('../middlewares/assignRole');
 
 // Ruta para mostrar la vista de inicio de sesión y registro
 router.get('/inicio', loginController.renderLoginRegister);
@@ -9,6 +10,6 @@ router.get('/inicio', loginController.renderLoginRegister);
 router.post('/inicio', loginController.login);
 
 // Ruta para procesar el registro de usuario
-router.post('/registro', loginController.register);
+router.post('/registro', assignRole, loginController.register);
 
 module.exports = router;

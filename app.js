@@ -42,7 +42,7 @@ app.use('/login', require('./routes/login.Routes')); // Ruta para la vista de lo
 app.use('/dashboard', require('./routes/home.Routes')); // Ruta para la vista de home
 app.use('/dashboard/ventas', require('./routes/venta.Routes')); // Ruta para la vista de ventas
 app.use('/dashboard/inventario', require('./routes/inventario.Routes')); // Ruta para la vista de inventario
-app.use('/dashboard/clientes', require('./routes/inventario.Routes'));
+app.use('/dashboard/clientes', require('./routes/cliente.Routes'));
 app.use('/dashboard/categorias', require('./routes/categoria.Routes'));
 
 // // Manejo de errores 404
