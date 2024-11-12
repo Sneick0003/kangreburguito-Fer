@@ -3,11 +3,17 @@
 <header>
     <nav class="container">
         <ul>
-            <li><a href="#home">Burger Delicia</a></li>
-            <li><a href="#menu">Menú</a></li>
+            <li><a href="/">Burger Delicia</a></li>
+            <li><a href="/kangreburguito-Fer/menu">Menú</a></li>
             <li><a href="#about">Nosotros</a></li>
             <li><a href="#contact">Contacto</a></li>
-            <li><a href="/login/inicio">Login</a></li>
+            <% if (isAuthenticated) { %>
+                <!-- Enlace de Cerrar Sesión para usuarios autenticados -->
+                <li><a href="/login/logout">Cerrar sesión</a></li>
+            <% } else { %>
+                <!-- Enlace de Login para usuarios no autenticados -->
+                <li><a href="/login/inicio">Login</a></li>
+            <% } %>
         </ul>
     </nav>
 </header>

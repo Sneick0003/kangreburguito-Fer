@@ -17,7 +17,7 @@
     <!-- Formulario para agregar producto -->
     <div id="addProductForm" style="display: none;">
       <h2>Agregar Producto</h2>
-      <form id="newProductForm" action="/dashboard/inventario/add" method="POST">
+      <form id="newProductForm" action="/dashboard/inventario/add" method="POST" enctype="multipart/form-data">
         <div class="mb-3">
           <label for="nombre" class="form-label">Nombre</label>
           <input type="text" class="form-control" id="nombre" name="nombre" required>
@@ -34,6 +34,10 @@
           <label for="cantidad_en_almacen" class="form-label">Cantidad en Almacén</label>
           <input type="number" class="form-control" id="cantidad_en_almacen" name="cantidad_en_almacen" required>
         </div>
+        <div class="mb-3">
+          <label for="productImage" class="form-label">Imagen del Producto</label>
+          <input type="file" class="form-control" id="productImage" name="productImage" accept="image/*">
+        </div>
         <button type="submit" class="btn btn-success">Agregar Producto</button>
       </form>
     </div>
@@ -43,6 +47,7 @@
       <thead>
         <tr>
           <th>ID</th>
+          <th>Imagen</th>
           <th>Nombre</th>
           <th>Descripción</th>
           <th>Precio</th>
@@ -54,6 +59,13 @@
         <% productos.forEach(producto => { %>
           <tr>
             <td><%= producto.id %></td>
+            <td>
+              <% if (producto.imagen) { %>
+                <img src="/uploads/<%= producto.imagen %>" alt="<%= producto.nombre %>" width="50">
+              <% } else { %>
+                <span>No Image</span>
+              <% } %>
+            </td>
             <td><%= producto.nombre %></td>
             <td><%= producto.descripcion %></td>
             <td><%= producto.precio.toFixed(2) %></td>
@@ -77,7 +89,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="editProductForm" method="POST">
+          <form id="editProductForm" action="/dashboard/inventario/editar" method="POST" enctype="multipart/form-data">
             <input type="hidden" id="editProductId" name="id">
             <div class="mb-3">
               <label for="editNombre" class="form-label">Nombre</label>
@@ -95,6 +107,10 @@
               <label for="editCantidad" class="form-label">Cantidad en Almacén</label>
               <input type="number" class="form-control" id="editCantidad" name="cantidad_en_almacen" required>
             </div>
+            <div class="mb-3">
+              <label for="editProductImage" class="form-label">Imagen del Producto</label>
+              <input type="file" class="form-control" id="editProductImage" name="productImage" accept="image/*">
+            </div>
             <button type="submit" class="btn btn-primary">Guardar Cambios</button>
           </form>
         </div>
@@ -108,10 +124,15 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     $(document).ready(function() {
-      // Initialize DataTables
+      // Inicializa DataTables
       $('#productosTable').DataTable();
+
+      // Mostrar/ocultar el formulario de "Agregar Producto"
+      $('#toggleFormBtn').on('click', function() {
+        $('#addProductForm').toggle();
+      });
   
-      // Handle delete product
+      // Manejo de eliminación de producto
       $('.delete-button').on('click', function(e) {
         e.preventDefault();
         const productId = $(this).data('id');
@@ -153,10 +174,10 @@
       $('.editBtn').on('click', function() {
         const row = $(this).closest('tr');
         const productId = row.find('td').eq(0).text();
-        const nombre = row.find('td').eq(1).text();
-        const descripcion = row.find('td').eq(2).text();
-        const precio = row.find('td').eq(3).text();
-        const cantidad = row.find('td').eq(4).text();
+        const nombre = row.find('td').eq(2).text();
+        const descripcion = row.find('td').eq(3).text();
+        const precio = row.find('td').eq(4).text();
+        const cantidad = row.find('td').eq(5).text();
   
         // Llenar el modal con los datos del producto
         $('#editProductId').val(productId);
@@ -168,37 +189,44 @@
         // Mostrar el modal
         $('#editModal').modal('show');
       });
-  
-      // Manejar el envío del formulario de edición
-      $('#editProductForm').on('submit', function(e) {
-        e.preventDefault();
-        const formData = $(this).serialize();
-        const productId = $('#editProductId').val();
-  
-        $.ajax({
-          url: '/dashboard/inventario/editar/' + productId,
-          method: 'POST',
-          data: formData,
-          success: function(response) {
-            Swal.fire(
-              'Actualizado!',
-              'El producto ha sido actualizado correctamente.',
-              'success'
-            ).then(() => {
-              // Redirige al dashboard después de la edición exitosa
-              window.location.href = '/dashboard/inventario';
-            });
-          },
-          error: function(err) {
-            Swal.fire(
-              'Error!',
-              'No se pudo actualizar el producto.',
-              'error'
-            );
-          }
-        });
-      });
     });
+
+    // Manejar el envío del formulario de edición
+$('#editProductForm').on('submit', function(e) {
+    e.preventDefault();
+
+    // Crear un objeto FormData para enviar datos y archivos
+    const formData = new FormData(this);
+    const productId = $('#editProductId').val();
+
+    $.ajax({
+        url: '/dashboard/inventario/editar/' + productId,
+        method: 'POST',
+        data: formData,
+        contentType: false, // Importante para enviar archivos
+        processData: false, // Evita que jQuery procese los datos
+        success: function(response) {
+            Swal.fire({
+                title: 'Actualizado!',
+                text: 'El producto ha sido actualizado correctamente.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Redirige a la página de inventario después de la actualización
+                window.location.href = '/dashboard/inventario';
+            });
+        },
+        error: function(err) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'No se pudo actualizar el producto.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+});
+
   </script>
   
 </body>

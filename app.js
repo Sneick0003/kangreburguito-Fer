@@ -26,6 +26,8 @@ app.use(myConnection(mysql, dbOptions, 'pool'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
 
 // Configuración de la sesión
 app.use(session({
@@ -35,9 +37,15 @@ app.use(session({
     cookie: { secure: false } // Cambia a `secure: true` solo si usas HTTPS
 }));
 
+// Middleware para hacer que isAuthenticated esté disponible en todas las vistas
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = !!req.session.userId;
+    next();
+});
+
 // Rutas públicas
-// app.js
 app.use('/', require('./routes/index.Routes')); // Ruta para la vista principal
+app.use('/kangreburguito-Fer/menu', require('./routes/menu.Routes')); // Ruta para la vista de menu
 app.use('/login', require('./routes/login.Routes')); // Ruta para la vista de login
 app.use('/dashboard', require('./routes/home.Routes')); // Ruta para la vista de home
 app.use('/dashboard/ventas', require('./routes/venta.Routes')); // Ruta para la vista de ventas
@@ -51,7 +59,7 @@ app.use('/dashboard/categorias', require('./routes/categoria.Routes'));
 // });
 
 // Iniciar el servidor
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

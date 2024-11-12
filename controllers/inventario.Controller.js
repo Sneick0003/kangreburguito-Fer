@@ -1,3 +1,4 @@
+// controllers/inventario.Controller.js
 const controller = {};
 
 controller.inventario = (req, res) => {
@@ -16,12 +17,13 @@ controller.inventario = (req, res) => {
 
 controller.agregarProducto = (req, res) => {
     const { nombre, descripcion, precio, cantidad_en_almacen } = req.body;
+    const imagen = req.file ? req.file.filename : null; // Procesa la imagen si está presente
     req.getConnection((err, connection) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
-        const sql = `INSERT INTO productos (nombre, descripcion, precio, cantidad_en_almacen) VALUES (?, ?, ?, ?)`;
-        connection.query(sql, [nombre, descripcion, precio, cantidad_en_almacen], (error, results) => {
+        const sql = `INSERT INTO productos (nombre, descripcion, precio, cantidad_en_almacen, imagen) VALUES (?, ?, ?, ?, ?)`;
+        connection.query(sql, [nombre, descripcion, precio, cantidad_en_almacen, imagen], (error, results) => {
             if (error) {
                 return res.status(500).json({ error: error.message });
             }
@@ -33,12 +35,13 @@ controller.agregarProducto = (req, res) => {
 controller.editarProducto = (req, res) => {
     const { id } = req.params;
     const { nombre, descripcion, precio, cantidad_en_almacen } = req.body;
+    const imagen = req.file ? req.file.filename : null; // Procesa la imagen si está presente
     req.getConnection((err, connection) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
-        const sql = `UPDATE productos SET nombre = ?, descripcion = ?, precio = ?, cantidad_en_almacen = ? WHERE id = ?`;
-        connection.query(sql, [nombre, descripcion, precio, cantidad_en_almacen, id], (error, results) => {
+        const sql = `UPDATE productos SET nombre = ?, descripcion = ?, precio = ?, cantidad_en_almacen = ?, imagen = ? WHERE id = ?`;
+        connection.query(sql, [nombre, descripcion, precio, cantidad_en_almacen, imagen, id], (error, results) => {
             if (error) {
                 return res.status(500).json({ error: error.message });
             }

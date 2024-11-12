@@ -12,4 +12,6 @@ router.post('/inicio', loginController.login);
 // Ruta para procesar el registro de usuario
 router.post('/registro', assignRole, loginController.register);
 
+router.get('/logout', loginController.logout);
+
 module.exports = router;
