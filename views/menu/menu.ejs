@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú - Restaurante Delicia</title>
+    <style>
+        :root {
+            --color-primary: #e74c3c;
+            --color-secondary: #f39c12;
+            --color-background: #ecf0f1;
+            --color-text: #2c3e50;
+            --color-card: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: var(--color-text);
+            background-color: var(--color-background);
+        }
+
+        nav {
+            background-color: var(--color-secondary);
+            padding: 1rem 0;
+            margin-top: 1rem;
+            position: relative;
+            z-index: 5;
+        }
+
+        nav ul {
+            list-style-type: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        nav ul li {
+            margin: 0 1rem;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #cart-icon {
+            font-size: 1.5rem;
+            color: var(--color-primary);
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            cursor: pointer;
+        }
+
+        #cart-count {
+            background-color: var(--color-secondary);
+            color: white;
+            border-radius: 50%;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.9rem;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .menu-section {
+            margin-bottom: 3rem;
+        }
+
+        .menu-section h2 {
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .menu-item {
+            background-color: var(--color-card);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .menu-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .menu-item-content {
+            padding: 1rem;
+        }
+
+        .menu-item h3 {
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-item p {
+            margin-bottom: 1rem;
+        }
+
+        .menu-item .price {
+            font-weight: bold;
+            color: var(--color-secondary);
+            font-size: 1.2rem;
+        }
+
+        .order-button {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            background-color: var(--color-primary);
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .order-button:hover {
+            background-color: #c0392b;
+        }
+
+        .order-button[disabled] {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        footer {
+            background-color: var(--color-primary);
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
+            position: relative;
+            z-index: 5;
+        }
+
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            nav ul li {
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/header') %>
+
+    <!-- Carrito de compras -->
+    <div id="cart-icon">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="cart-count">0</span>
+    </div>
+
+    <nav>
+        <ul>
+            <% Object.keys(menu).forEach(categoria => { %>
+                <li><a href="#<%= categoria.toLowerCase().replace(/\s/g, '-') %>">
+                        <%= categoria %>
+                    </a></li>
+            <% }); %>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <% Object.keys(menu).forEach(categoria => { %>
+            <section id="<%= categoria.toLowerCase().replace(/\s/g, '-') %>" class="menu-section">
+                <h2>
+                    <%= categoria %>
+                </h2>
+                <div class="menu-grid">
+                    <% menu[categoria].forEach(producto => { %>
+                        <div class="menu-item">
+                            <img src="/uploads/<%= producto.imagen %>" alt="<%= producto.nombre %>">
+                            <div class="menu-item-content">
+                                <h3>
+                                    <%= producto.nombre %>
+                                </h3>
+                                <p>
+                                    <%= producto.descripcion %>
+                                </p>
+                                <span class="price">$<%= producto.precio.toFixed(2) %></span>
+                                <% if (isAuthenticated) { %>
+                                    <button class="order-button" data-producto-id="<%= producto.id %>">Agregar al Carrito</button>
+                                <% } else { %>
+                                    <button class="order-button" disabled>Inicia sesión para comprar</button>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </section>
+        <% }); %>
+    </div>
+
+    <script>
+        let cartCount = 0;
+
+        function updateCartCount() {
+            cartCount++;
+            document.getElementById('cart-count').textContent = cartCount;
+        }
+
+        document.querySelectorAll('.order-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const producto_id = this.getAttribute('data-producto-id');
+                const cantidad = 1;
+
+                fetch('menu/add-to-cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ producto_id, cantidad })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        updateCartCount();
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+</body>
+
+</html>
