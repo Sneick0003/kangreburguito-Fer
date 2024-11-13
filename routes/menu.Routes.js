@@ -10,4 +10,7 @@ router.get('/', menuController.menu);
 // Ruta para agregar al carrito
 router.post('/add-to-cart', authMiddleware, menuController.addToCart);
 
+router.post('/finalizePurchase', authMiddleware, menuController.finalizePurchase);
+
+
 module.exports = router;

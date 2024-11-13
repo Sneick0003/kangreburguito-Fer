@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Burger Delicia - Las mejores hamburguesas de la ciudad</title>
     <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="/css/img.css">
+
+
 </head>
 <body>
     <%- include('./partials/header') %>
@@ -12,7 +15,7 @@
     <main>
         <section id="home" class="hero">
             <div class="container">
-                <h1>Bienvenidos a Burger Delicia</h1>
+                <h1>Bienvenidos a kangreburguito</h1>
                 <p>Las mejores hamburguesas de la ciudad</p>
             </div>
         </section>
@@ -21,36 +24,21 @@
             <div class="container">
                 <h2>Nuestras Hamburguesas Destacadas</h2>
                 <div class="burger-grid">
-                    <div class="burger-card">
-                        <img src="/placeholder.svg?height=200&width=300" alt="Hamburguesa Clásica">
-                        <div class="burger-info">
-                            <h3>Clásica</h3>
-                            <p>Carne, queso, lechuga, tomate y cebolla</p>
-                            <span class="price">$8.99</span>
+                    <% destacados.forEach(function(producto) { %>
+                        <div class="burger-card">
+                            <img src="/uploads/<%= producto.imagen %>" alt="<%= producto.nombre %>">
+                            <div class="burger-info">
+                                <h3><%= producto.nombre %></h3>
+                                <p><%= producto.descripcion %></p>
+                                <span class="price">$<%= producto.precio.toFixed(2) %></span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="burger-card">
-                        <img src="/placeholder.svg?height=200&width=300" alt="Hamburguesa BBQ Bacon">
-                        <div class="burger-info">
-                            <h3>BBQ Bacon</h3>
-                            <p>Carne, queso, tocino y salsa BBQ</p>
-                            <span class="price">$10.99</span>
-                        </div>
-                    </div>
-                    <div class="burger-card">
-                        <img src="/placeholder.svg?height=200&width=300" alt="Hamburguesa Vegetariana">
-                        <div class="burger-info">
-                            <h3>Vegetariana</h3>
-                            <p>Hamburguesa de lentejas, queso y vegetales</p>
-                            <span class="price">$9.99</span>
-                        </div>
-                    </div>
+                    <% }); %>
                 </div>
             </div>
         </section>
     </main>
 
     <%- include('./partials/footer') %>
-    <h1>hola
 </body>
 </html>

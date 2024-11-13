@@ -76,5 +76,74 @@ menuController.addToCart = (req, res) => {
         });
     });
 };
+menuController.finalizePurchase = (req, res) => {
+    const { cart } = req.body;
+    const userId = req.session.userId; // ID del usuario autenticado
+
+    req.getConnection((err, connection) => {
+        if (err) return res.status(500).json({ error: 'Error de conexión a la base de datos' });
+
+        // Iniciar transacción
+        connection.beginTransaction(err => {
+            if (err) return res.status(500).json({ error: 'Error al iniciar transacción' });
+
+            // Procesar cada producto en el carrito
+            const queries = cart.map(item => {
+                return new Promise((resolve, reject) => {
+                    connection.query(
+                        'SELECT cantidad_en_almacen FROM productos WHERE id = ?', [item.id],
+                        (error, results) => {
+                            if (error) return reject(error);
+                            const cantidadDisponible = results[0].cantidad_en_almacen;
+
+                            // Verifica si hay suficiente stock
+                            if (item.quantity > cantidadDisponible) {
+                                return reject(new Error(`Stock insuficiente para ${item.nombre}`));
+                            }
+
+                            // Actualizar inventario: descontar de `cantidad_en_almacen` y sumar a `cantidad_vendida`
+                            connection.query(
+                                'UPDATE productos SET cantidad_en_almacen = cantidad_en_almacen - ?, cantidad_vendida = cantidad_vendida + ? WHERE id = ?',
+                                [item.quantity, item.quantity, item.id],
+                                (error) => {
+                                    if (error) return reject(error);
+
+                                    // Registrar la compra en la tabla `compras`
+                                    connection.query(
+                                        'INSERT INTO compras (producto_id, usuario_id, cantidad) VALUES (?, ?, ?)',
+                                        [item.id, userId, item.quantity],
+                                        (error) => {
+                                            if (error) return reject(error);
+                                            resolve();
+                                        }
+                                    );
+                                }
+                            );
+                        }
+                    );
+                });
+            });
+
+            // Ejecutar todas las consultas y finalizar transacción
+            Promise.all(queries)
+                .then(() => {
+                    connection.commit(err => {
+                        if (err) {
+                            return connection.rollback(() => {
+                                res.status(500).json({ error: 'Error al finalizar transacción' });
+                            });
+                        }
+                        res.json({ success: true });
+                    });
+                })
+                .catch(error => {
+                    connection.rollback(() => {
+                        res.status(400).json({ error: error.message });
+                    });
+                });
+        });
+    });
+};
+
 
 module.exports = menuController;

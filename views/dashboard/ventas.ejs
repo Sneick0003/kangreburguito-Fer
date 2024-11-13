@@ -1,1 +1,94 @@
-<h1>holiwis</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/dash.css">
+  <title>Compras</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <%- include('../partials/sidebar.ejs') %>
+  <div class="flex-container">
+    <main class="main-content">
+      <div class="container">
+        <h1 class="my-4">Lista de Compras</h1>
+        
+        <!-- Tabla de compras -->
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Nombre del Usuario</th>
+              <th>Última Compra</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% Object.values(comprasPorUsuario).forEach(function(usuario) { %>
+              <tr>
+                <td><%= usuario.usuario_nombre %></td>
+                <td><%= new Date(usuario.compras[usuario.compras.length - 1].fecha_compra).toLocaleDateString() %></td>
+                <td>
+                  <!-- Botón para abrir el modal con los detalles de la compra -->
+                  <button class="btn btn-info" data-toggle="modal" data-target="#detalleUsuario<%= usuario.usuario_id %>">Ver</button>
+
+                  <!-- Modal para mostrar los detalles de la compra -->
+                  <div class="modal fade" id="detalleUsuario<%= usuario.usuario_id %>" tabindex="-1" role="dialog" aria-labelledby="detalleUsuarioLabel<%= usuario.usuario_id %>" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="detalleUsuarioLabel<%= usuario.usuario_id %>">Detalles de las compras</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          <!-- Tabla de detalles de compras -->
+                          <table class="table table-bordered">
+                            <thead>
+                              <tr>
+                                <th>Nombre del Producto</th>
+                                <th>Precio por Unidad</th>
+                                <th>Cantidad</th>
+                                <th>Precio Total</th>
+                                <th>Fecha de Compra</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <% let totalUsuario = 0; %>
+                              <% usuario.compras.forEach(function(compra) { %>
+                                <tr>
+                                  <td><%= compra.producto_nombre %></td>
+                                  <td>$<%= compra.precio_por_unidad.toFixed(2) %></td>
+                                  <td><%= compra.cantidad_producto %></td>
+                                  <td>$<%= compra.precio_total.toFixed(2) %></td>
+                                  <td><%= new Date(compra.fecha_compra).toLocaleDateString() %></td>
+                                </tr>
+                                <% totalUsuario += compra.precio_total; %>
+                              <% }); %>
+                            </tbody>
+                          </table>
+                          <h5>Total del Usuario: $<%= totalUsuario.toFixed(2) %></h5>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
