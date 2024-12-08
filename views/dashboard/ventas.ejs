@@ -4,84 +4,69 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/css/dash.css">
-  <title>Compras</title>
+  <title>Detalles de Ventas</title>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <%- include('../partials/sidebar.ejs') %>
   <div class="flex-container">
+
     <main class="main-content">
       <div class="container">
-        <h1 class="my-4">Lista de Compras</h1>
-        
-        <!-- Tabla de compras -->
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Nombre del Usuario</th>
-              <th>Última Compra</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% Object.values(comprasPorUsuario).forEach(function(usuario) { %>
-              <tr>
-                <td><%= usuario.usuario_nombre %></td>
-                <td><%= new Date(usuario.compras[usuario.compras.length - 1].fecha_compra).toLocaleDateString() %></td>
-                <td>
-                  <!-- Botón para abrir el modal con los detalles de la compra -->
-                  <button class="btn btn-info" data-toggle="modal" data-target="#detalleUsuario<%= usuario.usuario_id %>">Ver</button>
+        <h1 class="my-4">Detalles de las Ventas por Usuario</h1>
 
-                  <!-- Modal para mostrar los detalles de la compra -->
-                  <div class="modal fade" id="detalleUsuario<%= usuario.usuario_id %>" tabindex="-1" role="dialog" aria-labelledby="detalleUsuarioLabel<%= usuario.usuario_id %>" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="detalleUsuarioLabel<%= usuario.usuario_id %>">Detalles de las compras</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
-                        </div>
-                        <div class="modal-body">
-                          <!-- Tabla de detalles de compras -->
-                          <table class="table table-bordered">
-                            <thead>
-                              <tr>
-                                <th>Nombre del Producto</th>
-                                <th>Precio por Unidad</th>
-                                <th>Cantidad</th>
-                                <th>Precio Total</th>
-                                <th>Fecha de Compra</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <% let totalUsuario = 0; %>
-                              <% usuario.compras.forEach(function(compra) { %>
-                                <tr>
-                                  <td><%= compra.producto_nombre %></td>
-                                  <td>$<%= compra.precio_por_unidad.toFixed(2) %></td>
-                                  <td><%= compra.cantidad_producto %></td>
-                                  <td>$<%= compra.precio_total.toFixed(2) %></td>
-                                  <td><%= new Date(compra.fecha_compra).toLocaleDateString() %></td>
-                                </tr>
-                                <% totalUsuario += compra.precio_total; %>
-                              <% }); %>
-                            </tbody>
-                          </table>
-                          <h5>Total del Usuario: $<%= totalUsuario.toFixed(2) %></h5>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            <% }); %>
-          </tbody>
-        </table>
+        <div class="mb-4">
+          <label for="periodo">Seleccionar Periodo:</label>
+          <select id="periodo" class="form-control" onchange="filterByDate()">
+            <option value="semana">Semanal</option>
+            <option value="mes">Mensual</option>
+            <option value="ano" <%= periodo === 'ano' ? 'selected' : '' %>>Anual</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label for="fecha">Seleccionar Fecha Específica:</label>
+          <input type="date" id="fecha" class="form-control" onchange="filterByDate()" value="<%= fecha || new Date().toISOString().slice(0, 10) %>">
+        </div>
+
+        <div class="mb-4">
+          <button class="btn btn-success" onclick="generarTicket()">Generar Ticket de Corte de Caja</button>
+        </div>
+
+        <% comprasPorUsuario.forEach(function(usuario) { %>
+          <div class="card mb-4">
+            <div class="card-header">
+              <h4><%= usuario.usuario_nombre %> - Periodo: <%= usuario.periodo %></h4>
+            </div>
+            <div class="card-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Precio Unitario</th>
+                    <th>Cantidad</th>
+                    <th>Precio Total</th>
+                    <th>Fecha de Compra</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% usuario.compras.forEach(function(compra) { %>
+                    <tr>
+                      <td><%= compra.producto_nombre %></td>
+                      <td>$<%= compra.precio_por_unidad.toFixed(2) %></td>
+                      <td><%= compra.cantidad_producto %></td>
+                      <td>$<%= compra.precio_total.toFixed(2) %></td>
+                      <td><%= new Date(compra.fecha_compra).toLocaleDateString() %></td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% }); %>
       </div>
     </main>
   </div>
@@ -90,5 +75,79 @@
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function filterByDate() {
+      const periodoValue = document.getElementById('periodo').value;
+      const fechaValue = document.getElementById('fecha').value;
+      window.location.href = `?periodo=${periodoValue}&fecha=${fechaValue}`;
+    }
+  
+    function generarTicket() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+  
+      // Establece el título y los detalles de la cabecera
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("kangreburguito", 105, 20, { align: "center" });
+      doc.setFontSize(12);
+      doc.text("La casa de las mejores hamburguesas", 105, 30, { align: "center" });
+  
+      doc.setFontSize(10);
+      doc.text("Corte de Caja", 105, 40, { align: "center" });
+  
+      // Fecha y hora
+      const now = new Date();
+      doc.text("Fecha: " + now.toLocaleDateString() + " Hora: " + now.toLocaleTimeString(), 105, 50, { align: "center" });
+  
+      doc.setFont("helvetica", "normal");
+  
+      // Dibuja una línea horizontal
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.5);
+      doc.line(20, 55, 190, 55);
+  
+      // Variables para gestionar la posición vertical del contenido
+      let y = 60;
+      const incrementY = 10; // Incremento para la posición Y
+  
+      // Obtener los datos de la tabla
+      document.querySelectorAll('.table tbody tr').forEach((row, index) => {
+        let x = 20;
+        let firstCell = true;
+        row.querySelectorAll('td').forEach((cell) => {
+          // Ajustar el tamaño del texto y posición según el contenido
+          doc.setFontSize(12);
+          if (firstCell) {
+            doc.setFont("helvetica", "bold");
+            doc.text(cell.textContent + ":", x, y);
+            doc.setFont("helvetica", "normal");
+            x += 60; // Incremento para después del título del ítem
+          } else {
+            doc.text(cell.textContent, x, y);
+            x += 50; // Espacio entre los datos
+          }
+          firstCell = false;
+        });
+        y += incrementY; // Incremento para la siguiente línea
+      });
+  
+      // Línea final y balance
+      doc.line(20, y + 5, 190, y + 5);
+      y += 10;
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+  
+      // Nota de agradecimiento
+      y += 20;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text("Gracias por tu arduo trabajo", 105, y, { align: "center" });
+      doc.text("¡Hasta mañana!", 105, y + 10, { align: "center" });
+  
+      doc.save('corte_caja_' + now.toLocaleDateString() + '.pdf');
+    }
+  </script>
+  
 </body>
 </html>

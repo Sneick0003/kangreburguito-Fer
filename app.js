@@ -49,6 +49,9 @@ const authMiddleware = require('./middlewares/checkAdmin.js'); // Middleware de 
 app.use('/', require('./routes/index.Routes')); // Ruta para la vista principal
 app.use('/kangreburguito-Fer/menu', require('./routes/menu.Routes')); // Ruta para la vista de menu
 app.use('/login', require('./routes/login.Routes')); // Ruta para la vista de login
+
+
+//rutas protegida 
 app.use('/dashboard', authMiddleware, require('./routes/home.Routes')); // Ruta para la vista de home
 app.use('/dashboard/ventas', authMiddleware, require('./routes/venta.Routes')); // Ruta para la vista de ventas
 app.use('/dashboard/inventario', authMiddleware, require('./routes/inventario.Routes')); // Ruta para la vista de inventario

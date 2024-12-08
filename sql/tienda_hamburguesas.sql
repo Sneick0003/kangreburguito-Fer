@@ -124,6 +124,33 @@ INSERT INTO productos (nombre, descripcion, precio, cantidad_en_almacen, cantida
     ('Refresco Grande', 'Refresco de 600 ml', 20.00, 150, 70, 2),
     ('Combo Familiar', 'Combo de 3 hamburguesas y 3 refrescos', 180.00, 30, 5, 1);
 
+-- Insertando registros en la tabla 'compras'
+INSERT INTO compras (producto_id, usuario_id, cantidad, fecha_compra) VALUES
+-- Compras de la semana pasada
+(1, 1, 2, '2023-11-20 14:30:00'),
+(2, 1, 1, '2023-11-20 15:00:00'),
+(3, 1, 3, '2023-11-21 10:20:00'),
+
+-- Compras del mes pasado
+(4, 1, 1, '2023-10-15 09:00:00'),
+(1, 1, 2, '2023-10-16 12:45:00'),
+(2, 1, 4, '2023-10-17 16:30:00'),
+
+-- Compras de hace tres meses
+(3, 1, 1, '2023-08-22 14:00:00'),
+(4, 1, 1, '2023-08-23 11:15:00'),
+(1, 1, 1, '2023-08-24 13:50:00'),
+
+-- Compras del año pasado
+(2, 1, 2, '2022-12-05 15:00:00'),
+(3, 1, 3, '2022-12-06 10:00:00'),
+(4, 1, 1, '2022-12-07 14:30:00'),
+
+-- Compras de hace dos años
+(1, 1, 1, '2021-07-03 09:20:00'),
+(2, 1, 2, '2021-07-03 10:25:00'),
+(3, 1, 1, '2021-07-04 15:30:00');
+
 -- Inserción de una oferta
 INSERT INTO ofertas (producto_id, descuento, descripcion, fecha_inicio, fecha_fin) VALUES
     (1, 10.00, '10% de descuento en Hamburguesa Clásica', '2024-01-01', '2024-01-31');
